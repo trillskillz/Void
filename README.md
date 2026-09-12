@@ -79,3 +79,13 @@ See [docs/mvp.md](docs/mvp.md). Short version: one covenant template, one TS SDK
 ## License
 
 MIT
+
+## Runnable simulator (MVP)
+
+```bash
+npm test
+npm run demo:happy
+npm run demo:fail
+```
+
+See [docs/mvp-status.md](docs/mvp-status.md). The simulator is **not** on-chain.
