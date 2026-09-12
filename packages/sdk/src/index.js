@@ -1,6 +1,7 @@
 import { createSimulator } from "../../protocol/src/simulator.js";
 import { createPersistedSimulator } from "../../protocol/src/persisted.js";
 import { createKsbStubBackend } from "../../protocol/src/covenant.js";
+import { processJournal, harnessConfigFromEnv } from "../../protocol/src/harness.js";
 
 export function createClient(options = {}) {
   const backend = options.backend || createSimulator(options);
@@ -28,4 +29,4 @@ export function createKsbStubClient(options = {}) {
   return createClient({ backend: createKsbStubBackend(options) });
 }
 
-export { createSimulator, createPersistedSimulator, createKsbStubBackend };
+export { createSimulator, createPersistedSimulator, createKsbStubBackend, processJournal, harnessConfigFromEnv };
