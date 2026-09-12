@@ -25,3 +25,17 @@ npm run demo:opensilver
 2. KasBonds lock-bond → service bond / slash rail (required for cold agents)
 
 See `docs/covenant-adapter.md`.
+
+
+## Local execute
+
+```bash
+# in OpenSilver checkout
+npm install
+npm run build --workspace @opensilver/sdk
+npm run build --workspace @opensilver/integrations
+npm run build --workspace @opensilver/cli
+npm run bootstrap:silverc   # rust; builds upstream/silverscript/target/debug/silverc
+
+OPENSILVER_ROOT=/path/to/OpenSilver BONDED_WORK_OPENSILVER=1 npm run demo:opensilver
+```
