@@ -3,6 +3,7 @@ import { createPersistedSimulator } from "../../protocol/src/persisted.js";
 import { createKsbStubBackend } from "../../protocol/src/covenant.js";
 import { processJournal, harnessConfigFromEnv } from "../../protocol/src/harness.js";
 import { processEscrowDeploy, opensilverConfigFromEnv } from "../../protocol/src/opensilver.js";
+import { generateEscrowPartyKeys, bilateralEscrowCtorArgs, generateSecp256k1Keypair } from "../../protocol/src/keys.js";
 
 export function createClient(options = {}) {
   const backend = options.backend || createSimulator(options);
@@ -40,4 +41,7 @@ export {
   harnessConfigFromEnv,
   processEscrowDeploy,
   opensilverConfigFromEnv,
+  generateEscrowPartyKeys,
+  bilateralEscrowCtorArgs,
+  generateSecp256k1Keypair,
 };
