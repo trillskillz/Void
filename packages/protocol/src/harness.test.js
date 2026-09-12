@@ -1,5 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdirSync, writeFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import {
   harnessConfigFromEnv,
   planHarnessExec,
@@ -63,27 +66,41 @@ test("recordChainLock persists on simulator job", () => {
 });
 
 test("processJournal lock spawn writes chain meta onto job", async () => {
-  const backend = createKsbStubBackend();
-  const job = backend.openJob({
-    poster: "p",
-    escrowAmount: 10,
-    bondAmount: 1,
-    verifierId: "oracle:ksb",
-  });
-  backend.claim(job.jobId, "w");
-  const lockEntry = backend.journal().find((e) => e.action === "lock_bond");
+  const root = join(tmpdir(), `fake-kasbonds-${Date.now()}`);
+  const scripts = join(root, "scripts");
+  mkdirSync(scripts, { recursive: true });
+  writeFileSync(
+    join(scripts, "lock-bond.mjs"),
+    `console.log(JSON.stringify({ok:true,mode:"dry-run",covenantAddress:"kaspatest:covenant",finalTransactionId:"locktxid999"}))\n`
+  );
+  writeFileSync(join(scripts, "release-proof.mjs"), `console.log(JSON.stringify({ok:true}))\n`);
+  writeFileSync(join(scripts, "slash-proof.mjs"), `console.log(JSON.stringify({ok:true}))\n`);
 
-  const results = await processJournal([lockEntry], {
-    env: { BONDED_WORK_CHAIN: "1", KASBONDS_ROOT: "/tmp/fake-kasbonds" },
-    execute: true,
-    backend,
-  });
+  try {
+    const backend = createKsbStubBackend();
+    const job = backend.openJob({
+      poster: "p",
+      escrowAmount: 10,
+      bondAmount: 1,
+      verifierId: "oracle:ksb",
+    });
+    backend.claim(job.jobId, "w");
+    const lockEntry = backend.journal().find((e) => e.action === "lock_bond");
 
-  assert.equal(results[0].status, "ok");
-  assert.equal(results[0].wroteChain, true);
-  const loaded = backend.get(job.jobId);
-  assert.equal(loaded.chain.lockTxid, "locktxid999");
-  assert.equal(loaded.chain.covenantAddress, "kaspatest:covenant");
+    const results = await processJournal([lockEntry], {
+      env: { BONDED_WORK_CHAIN: "1", KASBONDS_ROOT: root },
+      execute: true,
+      backend,
+    });
+
+    assert.equal(results[0].status, "ok");
+    assert.equal(results[0].wroteChain, true);
+    const loaded = backend.get(job.jobId);
+    assert.equal(loaded.chain.lockTxid, "locktxid999");
+    assert.equal(loaded.chain.covenantAddress, "kaspatest:covenant");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("release plan picks up persisted lock txid", async () => {

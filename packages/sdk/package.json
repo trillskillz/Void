@@ -8,6 +8,6 @@
     ".": "./src/index.js"
   },
   "dependencies": {
-    "@bonded-work/protocol": "0.0.1"
+    "@bonded-work/protocol": "*"
   }
 }
