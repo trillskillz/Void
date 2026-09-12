@@ -54,6 +54,7 @@ export function createSimulator({ feeBps = DEFAULT_FEE_BPS, now = () => Date.now
         artifact: null,
         attestation: null,
         payouts: null,
+        chain: null,
         createdAt: t,
         updatedAt: t,
         events: [{ type: "open", at: t }],
@@ -133,7 +134,23 @@ export function createSimulator({ feeBps = DEFAULT_FEE_BPS, now = () => Date.now
       return snapshot(job);
     },
 
-    _hydrate(job) {
+    recordChainLock(jobId, meta) {
+      const job = get(jobId);
+      assert(meta && (meta.lockTxid || meta.covenantAddress), "lockTxid or covenantAddress required");
+      job.chain = {
+        ...(job.chain || {}),
+        lockTxid: meta.lockTxid ?? job.chain?.lockTxid ?? null,
+        lockVout: meta.lockVout ?? job.chain?.lockVout ?? null,
+        covenantAddress: meta.covenantAddress ?? job.chain?.covenantAddress ?? null,
+        lockMode: meta.lockMode ?? job.chain?.lockMode ?? null,
+        updatedAt: (now || Date.now)(),
+      };
+      job.updatedAt = (now || Date.now)();
+      job.events.push({ type: "chain_lock", at: job.updatedAt, chain: job.chain });
+      return snapshot(job);
+    },
+
+        _hydrate(job) {
       assert(job?.jobId, "hydrate requires jobId");
       assert(!jobs.has(job.jobId), `job exists: ${job.jobId}`);
       jobs.set(job.jobId, structuredClone(job));
