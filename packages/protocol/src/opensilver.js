@@ -14,6 +14,7 @@ import { spawn } from "node:child_process";
 import { accessSync, constants as fsConstants, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { recommendOpenSilverPattern } from "./covenant.js";
+import { deriveP2shAddress } from "./p2sh-address.js";
 import { bilateralEscrowCtorArgs, generateEscrowPartyKeys } from "./keys.js";
 
 export function opensilverConfigFromEnv(env = process.env) {
@@ -183,21 +184,35 @@ export async function processEscrowDeploy(job, opts = {}) {
   const ran = await runDeployPlan(plan, { ...opts, env, outPath });
   if (ran.status === "ok" && opts.backend?.recordEscrowPlan) {
     const p2sh = ran.parsed?.p2shCommitment ?? null;
+    const redeemScriptHex =
+      p2sh?.redeemScriptHex ?? ran.parsed?.compiled?.scriptHex ?? null;
+    const derived = await deriveP2shAddress(redeemScriptHex, plan.network, {
+      env,
+      deriver: opts.deriver,
+      kaspa: opts.kaspa,
+      kaspaWasmPath: opts.kaspaWasmPath || env.KASPA_WASM_PATH,
+    });
     const escrowMeta = {
       patternId: plan.patternId,
       network: plan.network,
       ctorArgs: plan.ctorArgs,
       p2shCommitment: p2sh,
-      redeemScriptHex: p2sh?.redeemScriptHex ?? ran.parsed?.compiled?.scriptHex ?? null,
+      redeemScriptHex,
       scriptLength: ran.parsed?.compiled?.scriptLength ?? null,
       entrypoints: ran.parsed?.deployment?.entrypoints ?? null,
       compileValidated: ran.parsed?.verification?.compileValidated ?? null,
+      escrowAddress: derived.ok ? derived.address : null,
+      addressDerive: derived.ok
+        ? { ok: true, networkId: derived.networkId }
+        : { ok: false, reason: derived.reason },
       deployPlanPath: outPath,
       raw: ran.parsed,
     };
     const updated = opts.backend.recordEscrowPlan(job.jobId, escrowMeta);
     ran.chain = updated.chain;
     ran.wroteEscrow = true;
+    ran.escrowAddress = escrowMeta.escrowAddress;
+    ran.addressDerive = escrowMeta.addressDerive;
   }
   return ran;
 }

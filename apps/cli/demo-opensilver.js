@@ -24,7 +24,7 @@ if (process.env.BONDED_WORK_OPENSILVER === "1") {
     execute: true,
     backend: client.backend,
   });
-  console.log("ran", ran.status, ran.wroteEscrow);
+  console.log("ran", ran.status, ran.wroteEscrow, ran.escrowAddress || ran.addressDerive);
   console.log("escrow", client.get(job.jobId).chain?.escrow);
 } else {
   console.log("(set BONDED_WORK_OPENSILVER=1 and OPENSILVER_ROOT to execute)");
