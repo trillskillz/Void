@@ -8,6 +8,7 @@
 - `demo:compose` / `bonded compose` + `--db --ksb` journal persistence
 - Verifier package stubs (human + model)
 - CLI `attest --policy human|model-stub`
+- CLI `settle` (release/slash plan or dry-run)
 - GitHub Actions `test` workflow
 
 ## Next

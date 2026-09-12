@@ -60,3 +60,18 @@ node apps/cli/bonded.js attest --db ./data/jobs.sqlite --ksb \
 node apps/cli/bonded.js attest --db ./data/jobs.sqlite --ksb \
   --job job_1 --verifier verifier:human --policy human --verdict pass
 ```
+
+## Settle (release / slash)
+
+After `attest`, the KSB journal has a `release` or `slash` entry. Plan (default) or dry-run spawn:
+
+```bash
+# plan only
+node apps/cli/bonded.js settle --db ./data/jobs.sqlite --ksb --job job_1
+
+# dry-run KasBonds release/slash (needs KASBONDS_ROOT; still DRY_RUN unless LIVE)
+BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/path/to/KasBonds \
+  node apps/cli/bonded.js settle --db ./data/jobs.sqlite --ksb --job job_1
+```
+
+Release/slash still need a real covenant UTXO for a successful script dry-run when pointing at a dry-run lock txid — planning always works.
