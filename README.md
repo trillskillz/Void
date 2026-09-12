@@ -118,3 +118,9 @@ npm run demo:harness
 ```
 
 See [docs/kasbonds-harness.md](docs/kasbonds-harness.md). Live broadcast requires `BONDED_WORK_CHAIN_LIVE=1` (off by default).
+
+### Lock txid write-back
+
+```bash
+BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/tmp/fake-kasbonds npm run demo:lock-txid
+```
