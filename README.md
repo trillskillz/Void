@@ -134,3 +134,12 @@ npm run demo:opensilver
 ```
 
 See [docs/opensilver-deploy.md](docs/opensilver-deploy.md).
+
+## CLI
+
+```bash
+node apps/cli/bonded.js help
+node apps/cli/bonded.js open --db ./data/jobs.sqlite --poster agent:p --escrow 1000 --bond 100 --job job_1
+```
+
+See [docs/cli.md](docs/cli.md).
