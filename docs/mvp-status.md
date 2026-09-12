@@ -2,13 +2,12 @@
 
 ## Done
 
-- In-memory simulator + SQLite persistence (`sql.js`)
-- SDK + verifier stub + CLI demos
-- **Covenant adapter spike:** Bonded Work ↔ KasBonds lifecycle map, OpenSilver pattern picks, `createKsbStubBackend` journal of intended lock/release/slash (no chain broadcast yet)
-- Docs: `docs/covenant-adapter.md`
+- Simulator + SQLite persistence + covenant adapter
+- **KasBonds harness bridge** (flag-gated): plans/spawns `lock-bond` / `release-proof` / `slash-proof` with DRY_RUN by default
+- Docs: `docs/kasbonds-harness.md`
 
 ## Next
 
-1. Hook journal actions to KasBonds TN12 scripts (`lock-bond` / `release-proof` / `slash-proof`) behind a feature flag
-2. Optional: compile-plan against OpenSilver escrow pattern via `opensilver deploy-plan`
-3. CLI with args
+1. After a dry-run spawn against a real KasBonds checkout, persist `BOND_LOCK_TXID` back onto the job
+2. Optional OpenSilver `deploy-plan` for escrow leg
+3. Arg CLI
