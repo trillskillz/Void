@@ -85,6 +85,14 @@ export function createKsbStubBackend({ feeBps, now, pattern } = {}) {
       });
       return job;
     },
+    recordEscrowPlan: (jobId, plan) => {
+      const job = sim.recordEscrowPlan(jobId, plan);
+      note("escrow_plan_recorded", job, {
+        intended: "opensilver deploy-plan artifact for escrow leg",
+        escrow: job.chain?.escrow,
+      });
+      return job;
+    },
 
     openJob(terms) {
       const job = sim.openJob({
