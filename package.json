@@ -12,6 +12,7 @@
     "demo:fail": "node apps/cli/demo-fail.js",
     "demo:persist": "node apps/cli/demo-persist.js",
     "demo:covenant": "node apps/cli/demo-covenant.js",
-    "demo:harness": "node apps/cli/demo-harness.js"
+    "demo:harness": "node apps/cli/demo-harness.js",
+    "demo:lock-txid": "node apps/cli/demo-lock-txid.js"
   }
 }
