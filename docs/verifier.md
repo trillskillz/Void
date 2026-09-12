@@ -10,3 +10,7 @@ npm run demo:verifier
 - `createModelStubVerifier` — checklist over `artifact.contentHash` / `uri` (no real model call)
 
 Replace the model stub’s `attest` with a real judge when you have one. Live chain release still goes through KasBonds harness flags.
+
+## CLI
+
+`bonded attest --policy model-stub|human` builds the attest payload then calls the simulator.

@@ -60,7 +60,7 @@ test("happy path via cli + sqlite", () => {
 
     r = run(["attest", "--db", db, "--job", "job_cli", "--verifier", "v1", "--verdict", "pass"]);
     assert.equal(r.status, 0, r.stderr);
-    assert.equal(JSON.parse(r.stdout).state, "Released");
+    assert.equal(JSON.parse(r.stdout).job.state, "Released");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -110,6 +110,36 @@ test("compose plans without execute flags", () => {
     assert.equal(out.jobId, "job_c");
     assert.ok(out.escrow);
     assert.ok(out.lock);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("model-stub policy attests from artifact hash", () => {
+  const dir = mkdtempSync(join(tmpdir(), "bonded-attest-"));
+  const db = join(dir, "jobs.sqlite");
+  try {
+    let r = run([
+      "open", "--db", db, "--ksb",
+      "--poster", "p", "--escrow", "100", "--bond", "10",
+      "--verifier", "verifier:model-stub", "--job", "job_a",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run(["claim", "--db", db, "--ksb", "--job", "job_a", "--worker", "w"]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run([
+      "submit", "--db", db, "--ksb", "--job", "job_a", "--worker", "w", "--hash", "sha256:pol",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run([
+      "attest", "--db", db, "--ksb", "--job", "job_a",
+      "--verifier", "verifier:model-stub", "--policy", "model-stub",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.policy, "model-stub");
+    assert.equal(out.policyAttest.verdict, "pass");
+    assert.equal(out.job.state, "Released");
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }

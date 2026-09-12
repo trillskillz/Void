@@ -14,7 +14,7 @@
  *   open    --poster <id> --escrow <n> [--bond <n>] [--verifier <id>] [--job <id>]
  *   claim   --job <id> --worker <id>
  *   submit  --job <id> --worker <id> --hash <contentHash> [--uri <uri>]
- *   attest  --job <id> --verifier <id> --verdict pass|fail [--evidence <ref>]
+ *   attest  --job <id> --verifier <id> [--policy human|model-stub] [--verdict pass|fail] [--evidence <ref>]
  *   expire  --job <id>
  *   get     --job <id>
  *   list
@@ -36,6 +36,7 @@ import {
 import { generateEscrowPartyKeys, generateSecp256k1Keypair, bilateralEscrowCtorArgs } from "../../packages/protocol/src/keys.js";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { createHumanVerifier, createModelStubVerifier } from "../../packages/verifier/src/index.js";
 
 function parseArgs(argv) {
   const out = { _: [] };
@@ -72,7 +73,7 @@ Commands:
   open    --poster <id> --escrow <n> [--bond <n>] [--verifier <id>] [--job <id>]
   claim   --job <id> --worker <id>
   submit  --job <id> --worker <id> --hash <contentHash> [--uri <uri>]
-  attest  --job <id> --verifier <id> --verdict pass|fail [--evidence <ref>]
+  attest  --job <id> --verifier <id> [--policy human|model-stub] [--verdict pass|fail] [--evidence <ref>]
   expire  --job <id>
   get     --job <id>
   list
@@ -144,16 +145,38 @@ async function main() {
         break;
       }
       case "attest": {
-        const verdict = requireFlag(args, "verdict");
+        const jobId = requireFlag(args, "job");
+        const verifierId = requireFlag(args, "verifier");
+        const policy = args.policy || "human";
+        const job = client.get(jobId);
+        if (!job) throw new Error(`job not found: ${jobId}`);
+
+        let verdict = args.verdict;
+        let evidence = args.evidence || null;
+        let policyAttest = null;
+
+        if (policy === "model-stub") {
+          const model = createModelStubVerifier({ verifierId });
+          policyAttest = model.attest({ jobId, artifact: job.artifact || {} });
+          if (verdict == null || verdict === true) verdict = policyAttest.verdict;
+          if (!evidence) evidence = policyAttest.evidenceRef;
+        } else if (policy === "human") {
+          if (verdict == null || verdict === true) {
+            throw new Error("human policy requires --verdict pass|fail");
+          }
+          const human = createHumanVerifier({ verifierId });
+          policyAttest = human.attest(
+            { jobId, artifact: job.artifact || {} },
+            { verdict, evidenceRef: evidence, note: args.note || null }
+          );
+          evidence = evidence || policyAttest.evidenceRef;
+        } else {
+          throw new Error("--policy must be human|model-stub");
+        }
+
         if (verdict !== "pass" && verdict !== "fail") throw new Error("--verdict must be pass|fail");
-        printJson(
-          client.attest(
-            requireFlag(args, "job"),
-            requireFlag(args, "verifier"),
-            verdict,
-            args.evidence || null
-          )
-        );
+        const done = client.attest(jobId, verifierId, verdict, evidence);
+        printJson({ job: done, policy, policyAttest });
         break;
       }
       case "expire": {
