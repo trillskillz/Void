@@ -48,3 +48,15 @@ node apps/cli/bonded.js get --db ./data/jobs.sqlite --ksb --job job_1
 ```
 
 `--db --ksb` persists jobs, `job.chain`, and the KSB journal in sqlite across process restarts.
+
+## Attest with verifier policy
+
+```bash
+# model stub derives pass/fail from job.artifact.contentHash
+node apps/cli/bonded.js attest --db ./data/jobs.sqlite --ksb \
+  --job job_1 --verifier verifier:model-stub --policy model-stub
+
+# human still requires an explicit verdict
+node apps/cli/bonded.js attest --db ./data/jobs.sqlite --ksb \
+  --job job_1 --verifier verifier:human --policy human --verdict pass
+```

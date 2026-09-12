@@ -15,7 +15,8 @@ This repo is a **runnable product sketch** — local simulator + flag-gated dry-
 | KasBonds lock/release/slash harness (dry-run) | done |
 | OpenSilver escrow deploy-plan + P2SH address | done |
 | Compose both legs on one job | done (`demo:compose` / `bonded compose`) |
-| Verifier adapters (human + model stub) | stub |
+| Verifier adapters (human + model stub) | CLI `--policy` |
+| GitHub Actions CI | `test` workflow |
 | Live TN12 broadcast | **off** unless `BONDED_WORK_CHAIN_LIVE=1` |
 
 ## Quick start
