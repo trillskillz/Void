@@ -39,3 +39,7 @@ Bonded Work's simulator states are the **product** state machine. The adapter ma
 - No mainnet / TN12 proof from this repo yet
 - No SilverScript source copied here (link out to OpenSilver/KasBonds)
 - No fee revenue
+
+## Compose dry-run
+
+`npm run demo:compose` runs OpenSilver deploy-plan then KasBonds lock-bond against the same job (both flag-gated, dry-run by default). See `docs/cli.md`.
