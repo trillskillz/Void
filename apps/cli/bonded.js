@@ -25,6 +25,9 @@
  */
 
 import { createClient, createPersistedClient, createKsbStubClient, processJournal, processEscrowDeploy } from "../../packages/sdk/src/index.js";
+import { generateEscrowPartyKeys, generateSecp256k1Keypair, bilateralEscrowCtorArgs } from "../../packages/protocol/src/keys.js";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 function parseArgs(argv) {
   const out = { _: [] };
@@ -166,11 +169,38 @@ async function main() {
       }
       case "plan-escrow": {
         const job = client.get(requireFlag(args, "job"));
-        const plan = await processEscrowDeploy(job, {
-          execute: false,
-          backend: client.backend,
-        });
+        const deployOpts = { execute: false, backend: client.backend };
+        if (args["generate-keys"]) {
+          const generated = generateEscrowPartyKeys();
+          deployOpts.ctor = generated.ctorArgs;
+          if (args["keys-out"]) {
+            mkdirSync(dirname(args["keys-out"]), { recursive: true });
+            writeFileSync(args["keys-out"], JSON.stringify(generated, null, 2));
+          }
+          const plan = await processEscrowDeploy(job, deployOpts);
+          printJson({ plan, keysWritten: args["keys-out"] || null, warning: generated.warning });
+          break;
+        }
+        if (args["buyer-pub"] && args["seller-pub"] && args["arbiter-pub"]) {
+          deployOpts.ctor = bilateralEscrowCtorArgs({
+            buyerPubKeyHex: args["buyer-pub"],
+            sellerPubKeyHex: args["seller-pub"],
+            arbiterPubKeyHex: args["arbiter-pub"],
+          });
+        }
+        const plan = await processEscrowDeploy(job, deployOpts);
         printJson(plan);
+        break;
+      }
+      case "keys": {
+        const sub = args._[1] || "generate";
+        if (sub !== "generate") throw new Error("usage: keys generate [--out file]");
+        const generated = generateEscrowPartyKeys();
+        if (args.out) {
+          mkdirSync(dirname(args.out), { recursive: true });
+          writeFileSync(args.out, JSON.stringify(generated, null, 2));
+        }
+        printJson(generated);
         break;
       }
       default:

@@ -14,6 +14,7 @@ import { spawn } from "node:child_process";
 import { accessSync, constants as fsConstants, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { recommendOpenSilverPattern } from "./covenant.js";
+import { bilateralEscrowCtorArgs, generateEscrowPartyKeys } from "./keys.js";
 
 export function opensilverConfigFromEnv(env = process.env) {
   return {
@@ -46,11 +47,16 @@ export function planDeployPlan(job, config, opts = {}) {
       needsArbiter: opts.needsArbiter !== false,
       milestones: !!opts.milestones,
     });
-  const ctor =
-    opts.ctor ||
-    (pattern.id === "core.escrow-bilateral"
-      ? stubCtorArgsForEscrow(job).ctorArgs
-      : stubCtorArgsForEscrow(job).ctorArgs);
+  let ctor = opts.ctor;
+  if (!ctor && opts.keys) {
+    ctor = bilateralEscrowCtorArgs(opts.keys);
+  }
+  if (!ctor && opts.generateKeys) {
+    ctor = generateEscrowPartyKeys().ctorArgs;
+  }
+  if (!ctor) {
+    ctor = stubCtorArgsForEscrow(job).ctorArgs;
+  }
 
   const args = [
     "opensilver",
