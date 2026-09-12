@@ -2,11 +2,11 @@
 
 ## Done
 
-- Simulator, SQLite, KasBonds harness + lock txid write-back
-- **OpenSilver deploy-plan bridge** (flag-gated) for escrow leg → `job.chain.escrow`
+- Simulator, SQLite, KasBonds + OpenSilver bridges
+- **Arg CLI** (`apps/cli/bonded.js`): open/claim/submit/attest/expire/get/list/journal/plan-*
 
 ## Next
 
-1. Real dry-run with `OPENSILVER_ROOT` / `KASBONDS_ROOT` checkouts
-2. Arg CLI
-3. Replace stub ctor pubkeys with wallet-derived keys
+1. Real dry-runs with `KASBONDS_ROOT` / `OPENSILVER_ROOT`
+2. Wallet-derived ctor keys (replace stubs)
+3. Optional: npm publish of `@bonded-work/sdk`
