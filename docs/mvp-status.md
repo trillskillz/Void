@@ -2,11 +2,11 @@
 
 ## Done
 
-- Simulator, SQLite, covenant adapter, KasBonds harness bridge
-- **Lock txid write-back:** parse harness stdout → `job.chain.{lockTxid,lockVout,covenantAddress}`; release/slash plans reuse it as `BOND_LOCK_TXID`
+- Simulator, SQLite, KasBonds harness + lock txid write-back
+- **OpenSilver deploy-plan bridge** (flag-gated) for escrow leg → `job.chain.escrow`
 
 ## Next
 
-1. Dry-run against a real KasBonds checkout (`KASBONDS_ROOT`)
-2. OpenSilver deploy-plan for escrow leg
-3. Arg CLI
+1. Real dry-run with `OPENSILVER_ROOT` / `KASBONDS_ROOT` checkouts
+2. Arg CLI
+3. Replace stub ctor pubkeys with wallet-derived keys
