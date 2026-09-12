@@ -17,7 +17,8 @@
     "demo:opensilver": "node apps/cli/demo-opensilver.js",
     "bonded": "node apps/cli/bonded.js",
     "test:cli": "node --test apps/cli/bonded.test.js",
-    "test:all": "npm test && npm run test:cli"
+    "test:all": "npm test && npm run test:cli",
+    "demo:lifecycle": "node apps/cli/demo-lifecycle.js"
   },
   "bin": {
     "bonded": "apps/cli/bonded.js"
