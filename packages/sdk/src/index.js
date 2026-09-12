@@ -1,6 +1,6 @@
 import { createSimulator } from "../../protocol/src/simulator.js";
+import { createPersistedSimulator } from "../../protocol/src/persisted.js";
 
-/** Thin client over a protocol backend (simulator by default). */
 export function createClient(options = {}) {
   const backend = options.backend || createSimulator(options);
   return {
@@ -13,7 +13,13 @@ export function createClient(options = {}) {
     expire: (jobId) => backend.expire(jobId),
     get: (jobId) => backend.get(jobId),
     list: () => backend.list(),
+    close: () => backend.close?.(),
   };
 }
 
-export { createSimulator };
+export async function createPersistedClient(options = {}) {
+  const backend = await createPersistedSimulator(options);
+  return createClient({ backend });
+}
+
+export { createSimulator, createPersistedSimulator };
