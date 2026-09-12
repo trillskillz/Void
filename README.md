@@ -108,3 +108,13 @@ npm run demo:covenant
 ```
 
 See [docs/covenant-adapter.md](docs/covenant-adapter.md).
+
+### KasBonds harness (flag-gated)
+
+```bash
+npm run demo:harness
+# optional dry-run spawn:
+# KASBONDS_ROOT=/path/to/KasBonds BONDED_WORK_CHAIN=1 npm run demo:harness
+```
+
+See [docs/kasbonds-harness.md](docs/kasbonds-harness.md). Live broadcast requires `BONDED_WORK_CHAIN_LIVE=1` (off by default).
