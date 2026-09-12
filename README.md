@@ -143,3 +143,11 @@ node apps/cli/bonded.js open --db ./data/jobs.sqlite --poster agent:p --escrow 1
 ```
 
 See [docs/cli.md](docs/cli.md).
+
+### Keys
+
+```bash
+node apps/cli/bonded.js keys generate --out ./data/escrow-keys.json
+```
+
+See [docs/keys.md](docs/keys.md).
