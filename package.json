@@ -14,6 +14,12 @@
     "demo:covenant": "node apps/cli/demo-covenant.js",
     "demo:harness": "node apps/cli/demo-harness.js",
     "demo:lock-txid": "node apps/cli/demo-lock-txid.js",
-    "demo:opensilver": "node apps/cli/demo-opensilver.js"
+    "demo:opensilver": "node apps/cli/demo-opensilver.js",
+    "bonded": "node apps/cli/bonded.js",
+    "test:cli": "node --test apps/cli/bonded.test.js",
+    "test:all": "npm test && npm run test:cli"
+  },
+  "bin": {
+    "bonded": "apps/cli/bonded.js"
   }
 }
