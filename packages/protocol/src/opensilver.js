@@ -97,24 +97,29 @@ export function runDeployPlan(plan, { spawnFn = spawn, env = process.env, outPat
       return;
     }
 
-    // Prefer local CLI entry if present; else npx opensilver from that root
+    // Prefer built CLI (node cli/dist/index.js); then .bin; then OPENSILVER_DEPLOY_BIN / npx
     const cliJs = join(plan.opensilverRoot, "cli", "dist", "index.js");
-    const cliTsRunner = join(plan.opensilverRoot, "node_modules", ".bin", "opensilver");
+    const cliBin = join(plan.opensilverRoot, "node_modules", ".bin", "opensilver");
+    const deployArgs = plan.argv.slice(1); // drop leading 'opensilver'
     let cmd;
     let cmdArgs;
-    try {
-      accessSync(cliTsRunner, fsConstants.X_OK);
-      cmd = cliTsRunner;
-      cmdArgs = plan.argv.slice(1); // drop leading 'opensilver'
-    } catch {
-      cmd = process.execPath;
-      // fake/test harness: allow OPENSILVER_DEPLOY_BIN
-      if (env.OPENSILVER_DEPLOY_BIN) {
-        cmd = env.OPENSILVER_DEPLOY_BIN;
-        cmdArgs = plan.argv.slice(1);
-      } else {
-        cmd = "npx";
-        cmdArgs = plan.argv;
+    if (env.OPENSILVER_DEPLOY_BIN) {
+      cmd = env.OPENSILVER_DEPLOY_BIN;
+      cmdArgs = deployArgs;
+    } else {
+      try {
+        accessSync(cliJs, fsConstants.R_OK);
+        cmd = process.execPath;
+        cmdArgs = [cliJs, ...deployArgs];
+      } catch {
+        try {
+          accessSync(cliBin, fsConstants.X_OK);
+          cmd = cliBin;
+          cmdArgs = deployArgs;
+        } catch {
+          cmd = "npx";
+          cmdArgs = plan.argv;
+        }
       }
     }
 
@@ -177,12 +182,16 @@ export async function processEscrowDeploy(job, opts = {}) {
   const outPath = join(config.outDir, `${job.jobId}-${plan.patternId}.json`);
   const ran = await runDeployPlan(plan, { ...opts, env, outPath });
   if (ran.status === "ok" && opts.backend?.recordEscrowPlan) {
+    const p2sh = ran.parsed?.p2shCommitment ?? null;
     const escrowMeta = {
       patternId: plan.patternId,
       network: plan.network,
       ctorArgs: plan.ctorArgs,
-      p2shCommitment: ran.parsed?.p2shCommitment ?? null,
+      p2shCommitment: p2sh,
+      redeemScriptHex: p2sh?.redeemScriptHex ?? ran.parsed?.compiled?.scriptHex ?? null,
+      scriptLength: ran.parsed?.compiled?.scriptLength ?? null,
       entrypoints: ran.parsed?.deployment?.entrypoints ?? null,
+      compileValidated: ran.parsed?.verification?.compileValidated ?? null,
       deployPlanPath: outPath,
       raw: ran.parsed,
     };
