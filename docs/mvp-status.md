@@ -2,11 +2,10 @@
 
 ## Done
 
-- Simulator, SQLite, KasBonds + OpenSilver bridges
-- **Arg CLI** (`apps/cli/bonded.js`): open/claim/submit/attest/expire/get/list/journal/plan-*
+- Full local stack: sim, sqlite, kasbonds/opensilver bridges, arg CLI
+- **Wallet key helpers**: secp256k1 generate + blake2b-256 arbiter hash + CLI `keys generate` / `plan-escrow --generate-keys`
 
 ## Next
 
-1. Real dry-runs with `KASBONDS_ROOT` / `OPENSILVER_ROOT`
-2. Wallet-derived ctor keys (replace stubs)
-3. Optional: npm publish of `@bonded-work/sdk`
+1. Point `KASBONDS_ROOT` / `OPENSILVER_ROOT` for real dry-runs
+2. Fund TN12 + live path behind `BONDED_WORK_CHAIN_LIVE` (explicit only)
