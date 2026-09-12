@@ -9,6 +9,7 @@
   "scripts": {
     "test": "npm test -w @bonded-work/protocol",
     "demo:happy": "node apps/cli/demo-happy.js",
-    "demo:fail": "node apps/cli/demo-fail.js"
+    "demo:fail": "node apps/cli/demo-fail.js",
+    "demo:persist": "node apps/cli/demo-persist.js"
   }
 }
