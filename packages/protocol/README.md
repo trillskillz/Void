@@ -16,3 +16,12 @@ sim.close(); // flushes to disk
 npm install
 npm test -w @bonded-work/protocol
 ```
+
+## Covenant stub
+
+```js
+import { createKsbStubBackend } from "@bonded-work/protocol/covenant";
+const backend = createKsbStubBackend();
+```
+
+See `/docs/covenant-adapter.md`.
