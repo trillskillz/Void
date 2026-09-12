@@ -1,0 +1,11 @@
+{
+  "name": "bonded-work",
+  "private": true,
+  "description": "Kaspa-native covenant escrow for agent-to-agent jobs (scaffold)",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "echo \"scaffold only — no build yet\""
+  }
+}
