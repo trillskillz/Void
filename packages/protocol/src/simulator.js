@@ -133,6 +133,14 @@ export function createSimulator({ feeBps = DEFAULT_FEE_BPS, now = () => Date.now
       return snapshot(job);
     },
 
+    _hydrate(job) {
+      assert(job?.jobId, "hydrate requires jobId");
+      assert(!jobs.has(job.jobId), `job exists: ${job.jobId}`);
+      jobs.set(job.jobId, structuredClone(job));
+      const n = Number(String(job.jobId).replace(/^job_/, ""));
+      if (Number.isFinite(n) && n > seq) seq = n;
+    },
+
     expire(jobId) {
       const job = get(jobId);
       const t = now();

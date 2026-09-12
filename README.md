@@ -89,3 +89,12 @@ npm run demo:fail
 ```
 
 See [docs/mvp-status.md](docs/mvp-status.md). The simulator is **not** on-chain.
+
+### Persistence
+
+```bash
+npm install
+npm run demo:persist
+```
+
+Jobs land in `./data/demo-jobs.sqlite` (sql.js wasm SQLite).
