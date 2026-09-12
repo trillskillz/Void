@@ -1,5 +1,6 @@
 import { createSimulator } from "../../protocol/src/simulator.js";
 import { createPersistedSimulator } from "../../protocol/src/persisted.js";
+import { createKsbStubBackend } from "../../protocol/src/covenant.js";
 
 export function createClient(options = {}) {
   const backend = options.backend || createSimulator(options);
@@ -13,6 +14,7 @@ export function createClient(options = {}) {
     expire: (jobId) => backend.expire(jobId),
     get: (jobId) => backend.get(jobId),
     list: () => backend.list(),
+    journal: () => backend.journal?.() ?? [],
     close: () => backend.close?.(),
   };
 }
@@ -22,4 +24,8 @@ export async function createPersistedClient(options = {}) {
   return createClient({ backend });
 }
 
-export { createSimulator, createPersistedSimulator };
+export function createKsbStubClient(options = {}) {
+  return createClient({ backend: createKsbStubBackend(options) });
+}
+
+export { createSimulator, createPersistedSimulator, createKsbStubBackend };
