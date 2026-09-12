@@ -77,6 +77,14 @@ export function createKsbStubBackend({ feeBps, now, pattern } = {}) {
     journal: () => journal.map((e) => structuredClone(e)),
     list: () => sim.list(),
     get: (id) => sim.get(id),
+    recordChainLock: (jobId, meta) => {
+      const job = sim.recordChainLock(jobId, meta);
+      note("chain_lock_recorded", job, {
+        intended: "persist BOND_LOCK_TXID for release/slash scripts",
+        chain: job.chain,
+      });
+      return job;
+    },
 
     openJob(terms) {
       const job = sim.openJob({

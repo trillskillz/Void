@@ -1,6 +1,6 @@
 {
   "name": "@bonded-work/protocol",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "type": "module",
   "description": "Covenant simulator + sqlite persistence for Bonded Work",
@@ -12,7 +12,7 @@
     "./harness": "./src/harness.js"
   },
   "scripts": {
-    "test": "node --test src/simulator.test.js src/persist.test.js src/covenant.test.js src/harness.test.js"
+    "test": "node --test src/*.test.js"
   },
   "dependencies": {
     "sql.js": "^1.12.0"

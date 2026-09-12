@@ -13,6 +13,7 @@ export function createClient(options = {}) {
     attest: (jobId, verifierId, verdict, evidenceRef) =>
       backend.attest(jobId, verifierId, verdict, evidenceRef),
     expire: (jobId) => backend.expire(jobId),
+    recordChainLock: (jobId, meta) => backend.recordChainLock?.(jobId, meta),
     get: (jobId) => backend.get(jobId),
     list: () => backend.list(),
     journal: () => backend.journal?.() ?? [],

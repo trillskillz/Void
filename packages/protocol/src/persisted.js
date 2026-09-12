@@ -33,6 +33,7 @@ export async function createPersistedSimulator({ dbPath, feeBps, now } = {}) {
     submit: wrap("submit"),
     attest: wrap("attest"),
     expire: wrap("expire"),
+    recordChainLock: wrap("recordChainLock"),
     async reload() {
       // re-read disk into a fresh simulator would require recreate; for tests use get from store
       return store.loadAll();
