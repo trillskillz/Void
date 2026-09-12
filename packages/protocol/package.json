@@ -1,6 +1,13 @@
 {
   "name": "@bonded-work/protocol",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "Covenant/tx helpers for Bonded Work (stub)"
+  "type": "module",
+  "description": "Covenant simulator + helpers for Bonded Work",
+  "exports": {
+    ".": "./src/simulator.js"
+  },
+  "scripts": {
+    "test": "node --test src/simulator.test.js"
+  }
 }
