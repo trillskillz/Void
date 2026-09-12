@@ -89,3 +89,47 @@ console.log(JSON.stringify(plan));
     "timeout_reclaim",
   ]);
 });
+
+test("processEscrowDeploy records escrowAddress from deriver", async () => {
+  const dir = join(tmpdir(), `os-addr-${Date.now()}`);
+  mkdirSync(dir, { recursive: true });
+  const bin = join(dir, "fake-opensilver");
+  writeFileSync(
+    bin,
+    `#!/usr/bin/env node
+const plan = {
+  patternId: "core.escrow-bilateral",
+  compiled: { scriptHex: "00ff", scriptLength: 2 },
+  deployment: { entrypoints: ["release_to_seller"] },
+  p2shCommitment: { scheme: "p2sh", redeemScriptHex: "00ff" },
+};
+console.log(JSON.stringify(plan));
+`
+  );
+  chmodSync(bin, 0o755);
+
+  const backend = createKsbStubBackend();
+  const job = backend.openJob({
+    poster: "agent:poster",
+    escrowAmount: 100,
+    bondAmount: 10,
+    verifierId: "oracle:ksb",
+  });
+  backend.claim(job.jobId, "agent:worker");
+
+  const result = await processEscrowDeploy(job, {
+    env: {
+      BONDED_WORK_OPENSILVER: "1",
+      OPENSILVER_ROOT: dir,
+      OPENSILVER_DEPLOY_BIN: bin,
+      BONDED_WORK_OPENSILVER_OUT: join(dir, "out"),
+    },
+    execute: true,
+    backend,
+    deriver: () => "kaspatest:qescrowderived",
+  });
+
+  assert.equal(result.status, "ok");
+  assert.equal(result.escrowAddress, "kaspatest:qescrowderived");
+  assert.equal(backend.get(job.jobId).chain.escrow.escrowAddress, "kaspatest:qescrowderived");
+});

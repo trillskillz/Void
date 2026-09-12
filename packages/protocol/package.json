@@ -1,6 +1,6 @@
 {
   "name": "@bonded-work/protocol",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "type": "module",
   "description": "Covenant simulator + sqlite persistence for Bonded Work",
@@ -11,7 +11,8 @@
     "./covenant": "./src/covenant.js",
     "./harness": "./src/harness.js",
     "./opensilver": "./src/opensilver.js",
-    "./keys": "./src/keys.js"
+    "./keys": "./src/keys.js",
+    "./p2sh-address": "./src/p2sh-address.js"
   },
   "scripts": {
     "test": "node --test src/*.test.js"

@@ -39,3 +39,20 @@ npm run bootstrap:silverc   # needs rustc ≥ 1.90; builds upstream/silverscript
 
 OPENSILVER_ROOT=/path/to/OpenSilver BONDED_WORK_OPENSILVER=1 npm run demo:opensilver
 ```
+
+
+## Escrow address
+
+After a successful deploy-plan execute, Bonded Work derives a Kaspa **P2SH address** from `redeemScriptHex` and stores it as `job.chain.escrow.escrowAddress`.
+
+Requires a kaspa-wasm build that exports `payToScriptHashScript` + `addressFromScriptPublicKey` (KasBonds vendor works):
+
+```bash
+export KASBONDS_ROOT=/path/to/KasBonds
+# or: export KASPA_WASM_PATH=/path/to/kaspa.js
+
+OPENSILVER_ROOT=/path/to/OpenSilver BONDED_WORK_OPENSILVER=1 \
+  KASBONDS_ROOT=/path/to/KasBonds npm run demo:opensilver
+```
+
+If wasm is missing, `escrowAddress` stays `null` and `addressDerive.reason` explains why.
