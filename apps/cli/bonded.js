@@ -21,10 +21,18 @@
  *   journal                 (ksb backend only)
  *   plan-chain              plan KasBonds harness steps from journal
  *   plan-escrow --job <id>  plan OpenSilver deploy-plan for escrow leg
+ *   compose  --job <id>     execute escrow plan + lock (env-gated; use --db --ksb)
  *   help
  */
 
-import { createClient, createPersistedClient, createKsbStubClient, processJournal, processEscrowDeploy } from "../../packages/sdk/src/index.js";
+import {
+  createClient,
+  createPersistedClient,
+  createPersistedKsbClient,
+  createKsbStubClient,
+  processJournal,
+  processEscrowDeploy,
+} from "../../packages/sdk/src/index.js";
 import { generateEscrowPartyKeys, generateSecp256k1Keypair, bilateralEscrowCtorArgs } from "../../packages/protocol/src/keys.js";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
@@ -58,6 +66,7 @@ Usage:
 Flags (global):
   --db <path>     persist jobs in sqlite (sql.js)
   --ksb           use KasBonds stub backend (enables journal)
+  --db + --ksb    persisted KSB (journal + chain meta survive reopen)
 
 Commands:
   open    --poster <id> --escrow <n> [--bond <n>] [--verifier <id>] [--job <id>]
@@ -70,6 +79,7 @@ Commands:
   journal
   plan-chain
   plan-escrow --job <id>
+  compose --job <id>   run OpenSilver deploy-plan + KasBonds lock (env-gated)
   help
 `;
   process.stdout.write(text);
@@ -88,6 +98,9 @@ function requireFlag(args, name) {
 }
 
 async function makeClient(args) {
+  if (args.db && args.ksb) {
+    return createPersistedKsbClient({ dbPath: args.db });
+  }
   if (args.db) {
     return createPersistedClient({ dbPath: args.db });
   }
@@ -190,6 +203,56 @@ async function main() {
         }
         const plan = await processEscrowDeploy(job, deployOpts);
         printJson(plan);
+        break;
+      }
+
+      case "compose": {
+        const jobId = requireFlag(args, "job");
+        const job = client.get(jobId);
+        if (!job) throw new Error(`job not found: ${jobId}`);
+        if (!client.journal().length) {
+          throw new Error("compose needs a KSB backend (--ksb or --db --ksb) with a journal");
+        }
+        const out = { jobId, escrow: null, lock: null, chain: null };
+        const osOn = process.env.BONDED_WORK_OPENSILVER === "1";
+        const chainOn = process.env.BONDED_WORK_CHAIN === "1";
+        if (osOn) {
+          mkdirSync(process.env.BONDED_WORK_OPENSILVER_OUT || "./data/opensilver-plans", {
+            recursive: true,
+          });
+          out.escrow = await processEscrowDeploy(client.get(jobId), {
+            execute: true,
+            backend: client.backend,
+            env: process.env,
+          });
+        } else {
+          out.escrow = await processEscrowDeploy(client.get(jobId), {
+            execute: false,
+            backend: client.backend,
+            env: process.env,
+          });
+          out.escrow = { ...out.escrow, note: "set BONDED_WORK_OPENSILVER=1 to execute" };
+        }
+        const lockEntry = client.journal().find((e) => e.action === "lock_bond" && e.jobId === jobId);
+        if (chainOn && lockEntry) {
+          const results = await processJournal([lockEntry], {
+            execute: true,
+            backend: client.backend,
+            env: process.env,
+          });
+          out.lock = results[0];
+        } else if (lockEntry) {
+          const results = await processJournal([lockEntry], {
+            execute: false,
+            backend: client.backend,
+            env: process.env,
+          });
+          out.lock = { ...results[0], note: "set BONDED_WORK_CHAIN=1 to execute" };
+        } else {
+          out.lock = { skipped: true, reason: "no lock_bond journal entry for job" };
+        }
+        out.chain = client.get(jobId).chain;
+        printJson(out);
         break;
       }
       case "keys": {

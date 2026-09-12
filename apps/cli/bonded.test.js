@@ -80,3 +80,37 @@ test("ksb journal + escrow plan helpers", async () => {
   const plan = await processEscrowDeploy(client.get("job_ksb"), { execute: false });
   assert.match(plan.command, /deploy-plan/);
 });
+
+test("compose plans without execute flags", () => {
+  const dir = mkdtempSync(join(tmpdir(), "bonded-compose-"));
+  const db = join(dir, "jobs.sqlite");
+  try {
+    let r = run([
+      "open",
+      "--db",
+      db,
+      "--ksb",
+      "--poster",
+      "p",
+      "--escrow",
+      "10",
+      "--bond",
+      "1",
+      "--verifier",
+      "v",
+      "--job",
+      "job_c",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run(["claim", "--db", db, "--ksb", "--job", "job_c", "--worker", "w"]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run(["compose", "--db", db, "--ksb", "--job", "job_c"]);
+    assert.equal(r.status, 0, r.stderr);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.jobId, "job_c");
+    assert.ok(out.escrow);
+    assert.ok(out.lock);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

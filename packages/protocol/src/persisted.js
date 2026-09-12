@@ -1,5 +1,6 @@
 import { createSimulator } from "./simulator.js";
 import { openSqliteStore } from "./store.js";
+import { createKsbStubBackend } from "./covenant.js";
 
 /**
  * Simulator backed by SQLite. Mutations write through to the store.
@@ -52,4 +53,48 @@ function hydrateJob(mem, job) {
     return;
   }
   throw new Error("simulator missing _hydrate");
+}
+
+/**
+ * KasBonds stub backend with SQLite write-through (journal + chain meta survive reopen).
+ */
+export async function createPersistedKsbBackend({ dbPath, feeBps, now, pattern } = {}) {
+  const store = await openSqliteStore(dbPath);
+  const backend = createKsbStubBackend({ feeBps, now, pattern });
+  for (const job of store.loadAll()) {
+    backend._hydrate(job);
+  }
+  const savedJournal = store.getKv("ksb_journal");
+  if (Array.isArray(savedJournal) && savedJournal.length) {
+    backend._replaceJournal(savedJournal);
+  }
+
+  function persistJournal() {
+    store.setKv("ksb_journal", backend.journal());
+  }
+
+  const persistMethods = [
+    "openJob",
+    "claim",
+    "submit",
+    "attest",
+    "expire",
+    "recordChainLock",
+    "recordEscrowPlan",
+  ];
+  const wrapped = { ...backend, store };
+  for (const method of persistMethods) {
+    wrapped[method] = (...args) => {
+      const result = backend[method](...args);
+      if (result?.jobId) store.upsert(result);
+      persistJournal();
+      return result;
+    };
+  }
+  wrapped.journal = () => backend.journal();
+  wrapped.close = () => {
+    persistJournal();
+    store.close();
+  };
+  return wrapped;
 }
