@@ -21,6 +21,12 @@ export async function openSqliteStore(dbPath) {
       updated_at INTEGER NOT NULL
     );
   `);
+  db.run(`
+    CREATE TABLE IF NOT EXISTS kv (
+      key TEXT PRIMARY KEY,
+      json TEXT NOT NULL
+    );
+  `);
 
   function persistToDisk() {
     if (!dbPath) return;
@@ -55,8 +61,28 @@ export async function openSqliteStore(dbPath) {
       stmt.free();
       return null;
     },
+    getKv(key) {
+      const stmt = db.prepare("SELECT json FROM kv WHERE key = ?");
+      stmt.bind([key]);
+      if (stmt.step()) {
+        const row = stmt.getAsObject();
+        stmt.free();
+        return JSON.parse(row.json);
+      }
+      stmt.free();
+      return null;
+    },
+    setKv(key, value) {
+      db.run(
+        `INSERT INTO kv (key, json) VALUES (?, ?)
+         ON CONFLICT(key) DO UPDATE SET json=excluded.json`,
+        [key, JSON.stringify(value)]
+      );
+      persistToDisk();
+    },
     clear() {
       db.run("DELETE FROM jobs");
+      db.run("DELETE FROM kv");
       persistToDisk();
     },
     close() {

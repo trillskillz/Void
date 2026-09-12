@@ -32,3 +32,19 @@ BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/path/to/KasBonds \
 ```
 
 Writes `job.chain.escrow` (incl. `escrowAddress` when kaspa-wasm resolves) and dry-run `job.chain.lockTxid`.
+
+## Compose via CLI (persisted)
+
+```bash
+node apps/cli/bonded.js open --db ./data/jobs.sqlite --ksb \
+  --poster agent:p --escrow 1000 --bond 100 --verifier oracle:ksb --job job_1
+node apps/cli/bonded.js claim --db ./data/jobs.sqlite --ksb --job job_1 --worker agent:w
+
+BONDED_WORK_OPENSILVER=1 OPENSILVER_ROOT=/path/to/OpenSilver \
+BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/path/to/KasBonds \
+  node apps/cli/bonded.js compose --db ./data/jobs.sqlite --ksb --job job_1
+
+node apps/cli/bonded.js get --db ./data/jobs.sqlite --ksb --job job_1
+```
+
+`--db --ksb` persists jobs, `job.chain`, and the KSB journal in sqlite across process restarts.
