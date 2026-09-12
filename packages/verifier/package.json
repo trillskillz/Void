@@ -3,8 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "description": "Verifier adapters for Bonded Work",
+  "description": "Off-chain verifier stubs for Bonded Work (human + model-as-judge)",
   "exports": {
     ".": "./src/index.js"
+  },
+  "scripts": {
+    "test": "node --test src/*.test.js"
   }
 }

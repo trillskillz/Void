@@ -4,17 +4,75 @@ Kaspa-native **covenant escrow for agent-to-agent jobs**.
 
 An agent posts work and a bond. Another agent claims it. Funds lock in a covenant. Release happens only when a verifier attests the outcome. Disputes slash or split the bond.
 
-This repo is the product sketch + scaffold — not a live protocol yet.
+This repo is a **runnable product sketch** — local simulator + flag-gated dry-runs against [KasBonds](https://github.com/trillskillz/KasBonds) and [OpenSilver](https://github.com/trillskillz/OpenSilver). It is **not** a live mainnet protocol.
+
+## Status
+
+| Layer | State |
+|---|---|
+| In-memory job simulator + fees | done |
+| SQLite persistence (`--db`) | done |
+| KasBonds lock/release/slash harness (dry-run) | done |
+| OpenSilver escrow deploy-plan + P2SH address | done |
+| Compose both legs on one job | done (`demo:compose` / `bonded compose`) |
+| Verifier adapters (human + model stub) | stub |
+| Live TN12 broadcast | **off** unless `BONDED_WORK_CHAIN_LIVE=1` |
+
+## Quick start
+
+```bash
+npm install
+npm test
+npm run demo:happy
+npm run demo:fail
+```
+
+### Persist + CLI
+
+```bash
+npm run demo:persist
+node apps/cli/bonded.js help
+
+node apps/cli/bonded.js open --db ./data/jobs.sqlite --ksb \
+  --poster agent:p --escrow 1000 --bond 100 --verifier oracle:ksb --job job_1
+node apps/cli/bonded.js claim --db ./data/jobs.sqlite --ksb --job job_1 --worker agent:w
+```
+
+### Compose dry-run (both covenant legs)
+
+Needs local checkouts + `websocket` in KasBonds (`npm i websocket`), OpenSilver built with `bootstrap:silverc` (rustc ≥ 1.90).
+
+```bash
+BONDED_WORK_OPENSILVER=1 OPENSILVER_ROOT=/path/to/OpenSilver \
+BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/path/to/KasBonds \
+  npm run demo:compose
+```
+
+Or via CLI (persists chain meta):
+
+```bash
+BONDED_WORK_OPENSILVER=1 OPENSILVER_ROOT=/path/to/OpenSilver \
+BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/path/to/KasBonds \
+  node apps/cli/bonded.js compose --db ./data/jobs.sqlite --ksb --job job_1
+```
+
+## Safety flags
+
+| Flag | Meaning |
+|---|---|
+| *(unset)* | Plan / simulate only |
+| `BONDED_WORK_CHAIN=1` | Allow KasBonds script spawn (`DRY_RUN=1` unless live) |
+| `BONDED_WORK_CHAIN_LIVE=1` | Actually broadcast (dangerous) |
+| `KASBONDS_ROOT` | Path to KasBonds checkout |
+| `BONDED_WORK_OPENSILVER=1` | Allow OpenSilver deploy-plan execute |
+| `OPENSILVER_ROOT` | Path to OpenSilver checkout |
+| `KASPA_WASM_PATH` | Optional override for P2SH address derive |
+
+Private keys are **never** invented by Bonded Work. Use `bonded keys generate` / KasBonds env the same way those repos already expect.
 
 ## Problem
 
 Agents already hire each other (compute, tools, scrapers, codegen). Trust is still theater: screenshots, reputation scores, hope. Cold agents cannot trade large jobs without a settlement rail that can **lock, release, and slash**.
-
-## Why now
-
-- Covenant / KIP-20 patterns are becoming usable (see OpenSilver-style libraries).
-- Agent marketplaces exist (discovery) but settlement is off-protocol.
-- Model-as-judge is good enough for many binary or checklist outcomes — and humans can still attest hard cases.
 
 ## How it works
 
@@ -24,130 +82,44 @@ Agents already hire each other (compute, tools, scrapers, codegen). Trust is sti
 2. **Worker** claims the job; covenant locks funds.
 3. Worker **submits** an artifact / proof pointer.
 4. **Verifier** attests pass → covenant **releases** escrow to worker (minus protocol fee).
-5. Bond returns to poster (or stays posted for the next job, depending on terms).
+5. Bond returns per terms.
 
 ### Dispute path
 
 1. Verifier attests fail, or poster challenges within a window.
 2. Covenant enters **Disputed**.
 3. Resolution policy runs (single verifier, panel, or timeout default).
-4. Outcome: **release**, **slash** (burn / protocol treasury), or **split**.
+4. Outcome: **release**, **slash**, or **split**.
 
-## Differentiation
+## Packages
 
-| Layer | Typical marketplace | Bonded Work |
-|---|---|---|
-| Discovery | yes | out of scope for MVP (bring your own matcher) |
-| Settlement | invoice / IOU / trust | on-chain lock + release/slash |
-| Failure | block / ghost | explicit slash / split |
-
-Related owner work to compose later: **KasBonds** (bond primitive), **OpenSilver** (covenant patterns), **clawdmarket** (agent marketplace), **KasGraph** (indexing).
-
-## Business model (hypothesis)
-
-Not traction — defaults to pressure-test:
-
-- **Take rate:** 2–5% of escrow on successful release.
-- **Bond insurance (optional):** poster or worker pays a premium for higher bond / faster release tiers.
-- **Verifier tiers:** free self-verify for tiny jobs; paid human or panel for high-value jobs.
-
-Cold-start bet: power users bonding large recurring jobs; later verifier subscriptions.
-
-## MVP (summary)
-
-See [docs/mvp.md](docs/mvp.md). Short version: one covenant template, one TS SDK, one verifier adapter (human + model stub), no full marketplace UI.
+- `packages/protocol` — simulator, sqlite store, KasBonds harness, OpenSilver bridge, keys, P2SH derive
+- `packages/sdk` — thin client wrappers
+- `packages/verifier` — human + model-as-judge **stubs** (off-chain attest helpers)
+- `apps/cli` — `bonded` CLI
 
 ## Docs
 
 - [Protocol sketch](docs/protocol.md)
 - [Fee model](docs/fees.md)
-- [MVP scope](docs/mvp.md)
+- [MVP scope](docs/mvp.md) · [MVP status](docs/mvp-status.md)
+- [CLI](docs/cli.md) · [Keys](docs/keys.md)
+- [Covenant adapter](docs/covenant-adapter.md)
+- [KasBonds harness](docs/kasbonds-harness.md)
+- [OpenSilver deploy-plan](docs/opensilver-deploy.md)
+- [Verifier stubs](docs/verifier.md)
 
-## Packages (stubs)
+## Related
 
-- `packages/protocol` — future covenant / tx helpers
-- `packages/sdk` — TS client: post, claim, submit, attest, release
-- `packages/verifier` — human + model-as-judge attest service
+Compose later: **KasBonds** (bond rail), **OpenSilver** (escrow patterns), **clawdmarket** (discovery), **KasGraph** (indexing).
 
 ## Non-goals (for now)
 
 - Full agent discovery marketplace
 - Cross-chain bridges
-- Live mainnet deployment from this scaffold
+- Live mainnet from this scaffold
 - Guaranteeing model-judge honesty without cryptoeconomic risk
 
 ## License
 
 MIT
-
-## Runnable simulator (MVP)
-
-```bash
-npm test
-npm run demo:happy
-npm run demo:fail
-```
-
-See [docs/mvp-status.md](docs/mvp-status.md). The simulator is **not** on-chain.
-
-### Persistence
-
-```bash
-npm install
-npm run demo:persist
-```
-
-Jobs land in `./data/demo-jobs.sqlite` (sql.js wasm SQLite).
-
-### Covenant adapter (spike)
-
-Maps product states onto **KasBonds** lifecycle + **OpenSilver** escrow patterns. Journals intended lock/release/slash — does **not** broadcast TN12 txs from this repo.
-
-```bash
-npm run demo:covenant
-```
-
-See [docs/covenant-adapter.md](docs/covenant-adapter.md).
-
-### KasBonds harness (flag-gated)
-
-```bash
-npm run demo:harness
-# optional dry-run spawn:
-# KASBONDS_ROOT=/path/to/KasBonds BONDED_WORK_CHAIN=1 npm run demo:harness
-```
-
-See [docs/kasbonds-harness.md](docs/kasbonds-harness.md). Live broadcast requires `BONDED_WORK_CHAIN_LIVE=1` (off by default).
-
-### Lock txid write-back
-
-```bash
-BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/tmp/fake-kasbonds npm run demo:lock-txid
-```
-
-### OpenSilver escrow deploy-plan
-
-```bash
-npm run demo:opensilver
-# execute against a checkout:
-# BONDED_WORK_OPENSILVER=1 OPENSILVER_ROOT=/path/to/OpenSilver npm run demo:opensilver
-```
-
-See [docs/opensilver-deploy.md](docs/opensilver-deploy.md).
-
-## CLI
-
-```bash
-node apps/cli/bonded.js help
-node apps/cli/bonded.js open --db ./data/jobs.sqlite --poster agent:p --escrow 1000 --bond 100 --job job_1
-```
-
-See [docs/cli.md](docs/cli.md).
-
-### Keys
-
-```bash
-node apps/cli/bonded.js keys generate --out ./data/escrow-keys.json
-```
-
-See [docs/keys.md](docs/keys.md).

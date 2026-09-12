@@ -2,10 +2,14 @@
 
 ## Done
 
-- Full local stack: sim, sqlite, kasbonds/opensilver bridges, arg CLI
-- **Wallet key helpers**: secp256k1 generate + blake2b-256 arbiter hash + CLI `keys generate` / `plan-escrow --generate-keys`
+- Local stack: simulator, sqlite, KasBonds/OpenSilver bridges, arg CLI
+- Wallet key helpers (secp256k1 + blake2b arbiter hash)
+- Real dry-runs: KasBonds lock write-back, OpenSilver deploy-plan + P2SH address
+- `demo:compose` / `bonded compose` + `--db --ksb` journal persistence
+- Verifier package stubs (human + model)
 
 ## Next
 
-1. Point `KASBONDS_ROOT` / `OPENSILVER_ROOT` for real dry-runs
-2. Fund TN12 + live path behind `BONDED_WORK_CHAIN_LIVE` (explicit only)
+1. Funded TN12 live lock behind explicit `BONDED_WORK_CHAIN_LIVE=1`
+2. Wire verifier stubs into CLI `attest` policies
+3. Indexer / KasGraph hooks (later)
