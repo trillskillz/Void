@@ -7,7 +7,7 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "npm test -w @bonded-work/protocol",
+    "test": "npm test -w @bonded-work/protocol && npm test -w @bonded-work/verifier",
     "demo:happy": "node apps/cli/demo-happy.js",
     "demo:fail": "node apps/cli/demo-fail.js",
     "demo:persist": "node apps/cli/demo-persist.js",
@@ -19,7 +19,8 @@
     "test:cli": "node --test apps/cli/bonded.test.js",
     "test:all": "npm test && npm run test:cli",
     "demo:lifecycle": "node apps/cli/demo-lifecycle.js",
-    "demo:compose": "node apps/cli/demo-compose.js"
+    "demo:compose": "node apps/cli/demo-compose.js",
+    "demo:verifier": "node apps/cli/demo-verifier.js"
   },
   "bin": {
     "bonded": "apps/cli/bonded.js"
