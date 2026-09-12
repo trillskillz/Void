@@ -22,3 +22,13 @@ node apps/cli/bonded.js claim --ksb --job j --worker w
 ```
 
 For multi-step without sqlite, chain in one shell session isn't preserved across invocations — use `--db`.
+
+## Compose demo (both legs)
+
+```bash
+BONDED_WORK_OPENSILVER=1 OPENSILVER_ROOT=/path/to/OpenSilver \
+BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/path/to/KasBonds \
+  npm run demo:compose
+```
+
+Writes `job.chain.escrow` (incl. `escrowAddress` when kaspa-wasm resolves) and dry-run `job.chain.lockTxid`.
