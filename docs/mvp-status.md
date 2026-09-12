@@ -2,15 +2,13 @@
 
 ## Done
 
-- In-memory simulator (`packages/protocol`) with open → claim → submit → release/slash
-- **SQLite persistence** via `sql.js` (`createPersistedSimulator`, `npm run demo:persist`)
-- SDK wrapper (`packages/sdk`) including `createPersistedClient`
-- Verifier stub (`packages/verifier`)
-- CLI demos: `demo:happy` / `demo:fail` / `demo:persist`
-- Protocol unit tests: `npm test`
+- In-memory simulator + SQLite persistence (`sql.js`)
+- SDK + verifier stub + CLI demos
+- **Covenant adapter spike:** Bonded Work ↔ KasBonds lifecycle map, OpenSilver pattern picks, `createKsbStubBackend` journal of intended lock/release/slash (no chain broadcast yet)
+- Docs: `docs/covenant-adapter.md`
 
 ## Next
 
-1. Swap simulator for real covenant template when ready
-2. CLI with args instead of fixed demos
-3. Optional: KasGraph / event indexer hook
+1. Hook journal actions to KasBonds TN12 scripts (`lock-bond` / `release-proof` / `slash-proof`) behind a feature flag
+2. Optional: compile-plan against OpenSilver escrow pattern via `opensilver deploy-plan`
+3. CLI with args
