@@ -2,6 +2,7 @@ import { createSimulator } from "../../protocol/src/simulator.js";
 import { createPersistedSimulator } from "../../protocol/src/persisted.js";
 import { createKsbStubBackend } from "../../protocol/src/covenant.js";
 import { processJournal, harnessConfigFromEnv } from "../../protocol/src/harness.js";
+import { processEscrowDeploy, opensilverConfigFromEnv } from "../../protocol/src/opensilver.js";
 
 export function createClient(options = {}) {
   const backend = options.backend || createSimulator(options);
@@ -14,6 +15,7 @@ export function createClient(options = {}) {
       backend.attest(jobId, verifierId, verdict, evidenceRef),
     expire: (jobId) => backend.expire(jobId),
     recordChainLock: (jobId, meta) => backend.recordChainLock?.(jobId, meta),
+    recordEscrowPlan: (jobId, plan) => backend.recordEscrowPlan?.(jobId, plan),
     get: (jobId) => backend.get(jobId),
     list: () => backend.list(),
     journal: () => backend.journal?.() ?? [],
@@ -30,4 +32,12 @@ export function createKsbStubClient(options = {}) {
   return createClient({ backend: createKsbStubBackend(options) });
 }
 
-export { createSimulator, createPersistedSimulator, createKsbStubBackend, processJournal, harnessConfigFromEnv };
+export {
+  createSimulator,
+  createPersistedSimulator,
+  createKsbStubBackend,
+  processJournal,
+  harnessConfigFromEnv,
+  processEscrowDeploy,
+  opensilverConfigFromEnv,
+};
