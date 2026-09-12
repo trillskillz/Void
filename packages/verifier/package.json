@@ -1,6 +1,10 @@
 {
   "name": "@bonded-work/verifier",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "Verifier adapters for Bonded Work (stub)"
+  "type": "module",
+  "description": "Verifier adapters for Bonded Work",
+  "exports": {
+    ".": "./src/index.js"
+  }
 }

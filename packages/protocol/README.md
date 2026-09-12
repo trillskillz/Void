@@ -1,11 +1,21 @@
 # `@bonded-work/protocol`
 
-Future home of covenant templates, encoding helpers, and state-transition checks for Bonded Work.
+In-memory **job simulator** implementing the Bonded Work state machine.
 
-**Status:** stub. See `/docs/protocol.md`.
+This is **not** on-chain. Same API shape we expect the real covenant backend to grow into.
 
-Planned surface (not implemented):
+```js
+import { createSimulator } from "@bonded-work/protocol";
 
-- job terms schema
-- open / claim / submit / attest / expire transaction builders
-- local simulator for MVP before mainnet templates
+const sim = createSimulator();
+const job = sim.openJob({ poster: "a", escrowAmount: 1000, bondAmount: 100, verifierId: "v" });
+sim.claim(job.jobId, "worker");
+sim.submit(job.jobId, "worker", { contentHash: "sha256:…" });
+sim.attest(job.jobId, "v", "pass");
+```
+
+## Scripts
+
+```bash
+npm test -w @bonded-work/protocol
+```

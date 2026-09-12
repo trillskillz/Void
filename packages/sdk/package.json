@@ -1,6 +1,13 @@
 {
   "name": "@bonded-work/sdk",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
-  "description": "TS client for Bonded Work (stub)"
+  "type": "module",
+  "description": "JS client for Bonded Work",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@bonded-work/protocol": "0.0.1"
+  }
 }

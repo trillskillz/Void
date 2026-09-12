@@ -1,11 +1,14 @@
 {
   "name": "bonded-work",
   "private": true,
-  "description": "Kaspa-native covenant escrow for agent-to-agent jobs (scaffold)",
+  "description": "Kaspa-native covenant escrow for agent-to-agent jobs",
+  "type": "module",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "echo \"scaffold only — no build yet\""
+    "test": "npm test -w @bonded-work/protocol",
+    "demo:happy": "node apps/cli/demo-happy.js",
+    "demo:fail": "node apps/cli/demo-fail.js"
   }
 }

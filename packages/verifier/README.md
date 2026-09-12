@@ -1,12 +1,6 @@
 # `@bonded-work/verifier`
 
-Attestation adapters for Bonded Work.
+- `humanAttest` — pass through a human verdict
+- `modelJudgeStub` — placeholder judge (not a real model)
 
-**Status:** stub.
-
-Planned adapters:
-
-- `human` — CLI/API attest with key
-- `model` — rubric + artifact → structured pass/fail + content hash
-
-Does not decide escrow by itself; it produces attestations the protocol consumes.
+Real model-as-judge should hash rubric+artifact (see `hashRubricAndArtifact`) before scoring.

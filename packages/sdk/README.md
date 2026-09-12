@@ -1,15 +1,10 @@
 # `@bonded-work/sdk`
 
-TypeScript client for Bonded Work.
+Client wrapper around the protocol backend (simulator today).
 
-**Status:** stub.
+```js
+import { createClient } from "@bonded-work/sdk";
 
-Planned API:
-
-- `openJob(terms)`
-- `claim(jobId)`
-- `submit(jobId, artifact)`
-- `attest(jobId, verdict)`
-- `expire(jobId)`
-
-Talks to `packages/protocol` (simulator or chain).
+const client = createClient();
+const job = client.openJob({ poster: "p", escrowAmount: 1000, bondAmount: 50, verifierId: "v" });
+```
