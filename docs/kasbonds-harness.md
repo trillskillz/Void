@@ -21,17 +21,25 @@ Private keys are **never** written by Bonded Work. Export them in the shell / Ka
 | `release` | `scripts/release-proof.mjs` |
 | `slash` | `scripts/slash-proof.mjs` |
 
+## Node WebSocket
+
+Kaspa wasm RPC needs `globalThis.WebSocket` even for `DRY_RUN`. Bonded Work spawns scripts via `kasbonds-runner.mjs`, which loads the `websocket` package from the KasBonds checkout.
+
+```bash
+cd /path/to/KasBonds && npm install websocket
+```
+
 ## Demo
 
 ```bash
 # plan only (default)
 npm run demo:harness
 
-# dry-run spawn (needs KasBonds checkout; still DRY_RUN=1)
-KASBONDS_ROOT=/path/to/KasBonds BONDED_WORK_CHAIN=1 npm run demo:harness
+# dry-run spawn + lock txid write-back
+KASBONDS_ROOT=/path/to/KasBonds BONDED_WORK_CHAIN=1 node apps/cli/demo-lock-txid.js
 ```
 
-## Not in this PR
+## Out of scope here
 
 - Funding wallets / faucet
-- Recording lock txid back into the job row automatically after a live lock (follow-up)
+- Live TN12 broadcast (`BONDED_WORK_CHAIN_LIVE=1`) without an explicit operator decision

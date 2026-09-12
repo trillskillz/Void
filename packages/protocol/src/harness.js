@@ -12,6 +12,7 @@
 import { spawn } from "node:child_process";
 import { accessSync, constants as fsConstants } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const ACTION_TO_SCRIPT = {
   lock_bond: "lock-bond.mjs",
@@ -143,6 +144,11 @@ export function chainMetaFromLockResult(parsed) {
   };
 }
 
+/** Absolute path to the WebSocket-polyfill runner shipped with Bonded Work. */
+export function kasbondsRunnerPath() {
+  return join(fileURLToPath(new URL(".", import.meta.url)), "kasbonds-runner.mjs");
+}
+
 export function runHarnessPlan(plan, { spawnFn = spawn } = {}) {
   return new Promise((resolve, reject) => {
     if (plan.skipped) {
@@ -156,11 +162,14 @@ export function runHarnessPlan(plan, { spawnFn = spawn } = {}) {
       return;
     }
 
-    const child = spawnFn(process.execPath, [plan.scriptPath], {
+    const runner = plan.runnerPath || kasbondsRunnerPath();
+    const child = spawnFn(process.execPath, [runner], {
       cwd: plan.cwd,
       env: {
         ...process.env,
         ...Object.fromEntries(Object.entries(plan.env).filter(([, v]) => v != null)),
+        KASBONDS_ROOT: plan.cwd,
+        KASBONDS_SCRIPT: plan.scriptPath,
       },
       stdio: ["ignore", "pipe", "pipe"],
     });
