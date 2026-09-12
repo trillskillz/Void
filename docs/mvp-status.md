@@ -3,13 +3,14 @@
 ## Done
 
 - In-memory simulator (`packages/protocol`) with open → claim → submit → release/slash
-- SDK wrapper (`packages/sdk`)
+- **SQLite persistence** via `sql.js` (`createPersistedSimulator`, `npm run demo:persist`)
+- SDK wrapper (`packages/sdk`) including `createPersistedClient`
 - Verifier stub (`packages/verifier`)
-- CLI demos: `npm run demo:happy` / `npm run demo:fail`
+- CLI demos: `demo:happy` / `demo:fail` / `demo:persist`
 - Protocol unit tests: `npm test`
 
 ## Next
 
-1. Persist jobs (sqlite / json log)
-2. Swap simulator for real covenant template when ready
-3. CLI with args instead of fixed demos
+1. Swap simulator for real covenant template when ready
+2. CLI with args instead of fixed demos
+3. Optional: KasGraph / event indexer hook
