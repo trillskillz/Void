@@ -98,3 +98,13 @@ npm run demo:persist
 ```
 
 Jobs land in `./data/demo-jobs.sqlite` (sql.js wasm SQLite).
+
+### Covenant adapter (spike)
+
+Maps product states onto **KasBonds** lifecycle + **OpenSilver** escrow patterns. Journals intended lock/release/slash — does **not** broadcast TN12 txs from this repo.
+
+```bash
+npm run demo:covenant
+```
+
+See [docs/covenant-adapter.md](docs/covenant-adapter.md).
