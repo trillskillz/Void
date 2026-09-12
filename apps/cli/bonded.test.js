@@ -144,3 +144,34 @@ test("model-stub policy attests from artifact hash", () => {
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("settle plans release after attest pass", () => {
+  const dir = mkdtempSync(join(tmpdir(), "bonded-settle-"));
+  const db = join(dir, "jobs.sqlite");
+  try {
+    let r = run([
+      "open", "--db", db, "--ksb",
+      "--poster", "p", "--escrow", "100", "--bond", "10",
+      "--verifier", "v", "--job", "job_s",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run(["claim", "--db", db, "--ksb", "--job", "job_s", "--worker", "w"]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run([
+      "submit", "--db", db, "--ksb", "--job", "job_s", "--worker", "w", "--hash", "sha256:s",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run([
+      "attest", "--db", db, "--ksb", "--job", "job_s",
+      "--verifier", "v", "--policy", "human", "--verdict", "pass",
+    ]);
+    assert.equal(r.status, 0, r.stderr);
+    r = run(["settle", "--db", db, "--ksb", "--job", "job_s"]);
+    assert.equal(r.status, 0, r.stderr);
+    const out = JSON.parse(r.stdout);
+    assert.equal(out.execute, false);
+    assert.ok(out.results.some((x) => (x.journalEntry?.action || x.action) === "release" || x.wouldRun === "release-proof.mjs" || x.scriptName === "release-proof.mjs"));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});

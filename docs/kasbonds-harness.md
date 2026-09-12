@@ -53,3 +53,11 @@ KASBONDS_ROOT=/path/to/KasBonds BONDED_WORK_CHAIN=1 npm run demo:lifecycle
 
 Dry-run **lock** builds a tx and writes `job.chain.{lockTxid,lockVout,covenantAddress}` without broadcasting.
 Dry-run **release/slash** still asks KasBonds for a real UTXO at that outpoint. Until a live lock funds the covenant (or you point `BOND_LOCK_TXID` at an existing TN12 UTXO), release will exit with "Could not resolve covenant UTXO".
+
+## CLI settle
+
+```bash
+node apps/cli/bonded.js settle --db ./data/jobs.sqlite --ksb --job job_1
+```
+
+Runs `processJournal` on the job's `release` or `slash` entry. See `docs/cli.md`.

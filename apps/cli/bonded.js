@@ -22,6 +22,7 @@
  *   plan-chain              plan KasBonds harness steps from journal
  *   plan-escrow --job <id>  plan OpenSilver deploy-plan for escrow leg
  *   compose  --job <id>     execute escrow plan + lock (env-gated; use --db --ksb)
+ *   settle   --job <id>     plan/execute release or slash from journal (env-gated)
  *   help
  */
 
@@ -81,6 +82,7 @@ Commands:
   plan-chain
   plan-escrow --job <id>
   compose --job <id>   run OpenSilver deploy-plan + KasBonds lock (env-gated)
+  settle  --job <id>   plan/execute release or slash after attest (env-gated)
   help
 `;
   process.stdout.write(text);
@@ -276,6 +278,41 @@ async function main() {
         }
         out.chain = client.get(jobId).chain;
         printJson(out);
+        break;
+      }
+
+      case "settle": {
+        const jobId = requireFlag(args, "job");
+        const job = client.get(jobId);
+        if (!job) throw new Error(`job not found: ${jobId}`);
+        if (!client.journal().length) {
+          throw new Error("settle needs a KSB backend (--ksb or --db --ksb) with a journal");
+        }
+        const settleActions = new Set(["release", "slash"]);
+        const entries = client
+          .journal()
+          .filter((e) => e.jobId === jobId && settleActions.has(e.action));
+        if (!entries.length) {
+          throw new Error(
+            `no release/slash journal entry for ${jobId} (attest pass|fail first)`
+          );
+        }
+        const chainOn = process.env.BONDED_WORK_CHAIN === "1";
+        const results = await processJournal(entries, {
+          execute: chainOn,
+          backend: client.backend,
+          env: process.env,
+        });
+        printJson({
+          jobId,
+          state: client.get(jobId).state,
+          chain: client.get(jobId).chain,
+          execute: chainOn,
+          note: chainOn
+            ? null
+            : "planned only — set BONDED_WORK_CHAIN=1 to spawn KasBonds scripts (still DRY_RUN unless LIVE)",
+          results,
+        });
         break;
       }
       case "keys": {
