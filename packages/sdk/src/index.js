@@ -1,4 +1,4 @@
-import { createSimulator } from "@bonded-work/protocol";
+import { createSimulator } from "../../protocol/src/simulator.js";
 
 /** Thin client over a protocol backend (simulator by default). */
 export function createClient(options = {}) {
