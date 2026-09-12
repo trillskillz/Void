@@ -134,6 +134,26 @@ export function createSimulator({ feeBps = DEFAULT_FEE_BPS, now = () => Date.now
       return snapshot(job);
     },
 
+    recordEscrowPlan(jobId, plan) {
+      const job = get(jobId);
+      assert(plan && (plan.patternId || plan.raw), "escrow plan required");
+      job.chain = {
+        ...(job.chain || {}),
+        escrow: {
+          patternId: plan.patternId ?? null,
+          network: plan.network ?? null,
+          ctorArgs: plan.ctorArgs ?? null,
+          p2shCommitment: plan.p2shCommitment ?? null,
+          entrypoints: plan.entrypoints ?? null,
+          deployPlanPath: plan.deployPlanPath ?? null,
+          updatedAt: (now || Date.now)(),
+        },
+      };
+      job.updatedAt = (now || Date.now)();
+      job.events.push({ type: "escrow_plan", at: job.updatedAt, escrow: job.chain.escrow });
+      return snapshot(job);
+    },
+
     recordChainLock(jobId, meta) {
       const job = get(jobId);
       assert(meta && (meta.lockTxid || meta.covenantAddress), "lockTxid or covenantAddress required");

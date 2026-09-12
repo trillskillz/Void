@@ -124,3 +124,13 @@ See [docs/kasbonds-harness.md](docs/kasbonds-harness.md). Live broadcast require
 ```bash
 BONDED_WORK_CHAIN=1 KASBONDS_ROOT=/tmp/fake-kasbonds npm run demo:lock-txid
 ```
+
+### OpenSilver escrow deploy-plan
+
+```bash
+npm run demo:opensilver
+# execute against a checkout:
+# BONDED_WORK_OPENSILVER=1 OPENSILVER_ROOT=/path/to/OpenSilver npm run demo:opensilver
+```
+
+See [docs/opensilver-deploy.md](docs/opensilver-deploy.md).
